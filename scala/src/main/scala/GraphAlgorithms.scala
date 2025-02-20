@@ -7,13 +7,12 @@ object GraphAlgorithms {
   private type Edge = (Vertex, Int) // (destination, weight)
   private type Graph = Map[Vertex, List[Edge]]
 
-  /**
-   * Generates a strongly-connected directed graph with n vertices and s edges.
-   * Vertices are labeled "1", "2", …, "n". The weights are random integers in 1 to 10.
-   * To guarantee strong connectivity we first create a cycle.
-   *
-   * If s is less than n, we bump it to n.
-   */
+  /** Generates a strongly-connected directed graph with n vertices and s edges.
+    * Vertices are labeled "1", "2", …, "n". The weights are random integers in
+    * 1 to 10. To guarantee strong connectivity we first create a cycle.
+    *
+    * If s is less than n, we bump it to n.
+    */
   def makeGraph(n: Int, s: Int): Graph = {
     require(n > 0, "Number of vertices must be positive")
     val totalEdges = if (s < n) n else s
@@ -22,7 +21,8 @@ object GraphAlgorithms {
     val rand = new Random
 
     val permuted = rand.shuffle(vertices)
-    val cycleEdges: List[(Vertex, Vertex)] = permuted.zip(permuted.tail :+ permuted.head)
+    val cycleEdges: List[(Vertex, Vertex)] =
+      permuted.zip(permuted.tail :+ permuted.head)
 
     val edgeSet: mutable.Set[(Vertex, Vertex)] = mutable.Set() ++ cycleEdges
 
@@ -48,14 +48,17 @@ object GraphAlgorithms {
     graphMutable.map { case (v, edges) => v -> edges.toList }.toMap
   }
 
-  /**
-   * Dijkstra's algorithm.
-   * Returns a tuple of:
-   *   - distances: Map from each vertex to its shortest distance from source.
-   *   - previous: Map to help reconstruct the shortest-path tree.
-   */
-  private def dijkstra(graph: Graph, source: Vertex): (Map[Vertex, Int], Map[Vertex, Vertex]) = {
-    val distances = mutable.Map[Vertex, Int]().withDefaultValue(Int.MaxValue)
+  /** Dijkstra's algorithm. Returns a tuple of:
+    *   - distances: Map from each vertex to its shortest distance from source.
+    *   - previous: Map to help reconstruct the shortest-path tree.
+    */
+  private def dijkstra(
+      graph: Graph,
+      source: Vertex
+  ): (Map[Vertex, Int], Map[Vertex, Vertex]) = {
+    // Pre-populate distances with all vertices in the graph
+    val distances =
+      mutable.Map[Vertex, Int]() ++ graph.keys.map(v => v -> Int.MaxValue)
     val previous = mutable.Map[Vertex, Vertex]()
     distances(source) = 0
 
@@ -80,11 +83,14 @@ object GraphAlgorithms {
     (distances.toMap, previous.toMap)
   }
 
-  /**
-   * Reconstructs the shortest path from source to target using the 'previous' map.
-   * Returns a list of vertices representing the path.
-   */
-  private def reconstructPath(previous: Map[Vertex, Vertex], source: Vertex, target: Vertex): List[Vertex] = {
+  /** Reconstructs the shortest path from source to target using the 'previous'
+    * map. Returns a list of vertices representing the path.
+    */
+  private def reconstructPath(
+      previous: Map[Vertex, Vertex],
+      source: Vertex,
+      target: Vertex
+  ): List[Vertex] = {
     @tailrec
     def buildPath(v: Vertex, acc: List[Vertex]): List[Vertex] =
       if (v == source) source :: acc
@@ -94,11 +100,14 @@ object GraphAlgorithms {
     else buildPath(target, Nil)
   }
 
-  /**
-   * Finds the shortest path from source to target.
-   * Returns Some((path, totalWeight)) if a path exists, or None if unreachable.
-   */
-  def shortestPath(graph: Graph, source: Vertex, target: Vertex): Option[(List[Vertex], Int)] = {
+  /** Finds the shortest path from source to target. Returns Some((path,
+    * totalWeight)) if a path exists, or None if unreachable.
+    */
+  def shortestPath(
+      graph: Graph,
+      source: Vertex,
+      target: Vertex
+  ): Option[(List[Vertex], Int)] = {
     val (distances, previous) = dijkstra(graph, source)
     if (distances(target) == Int.MaxValue) None
     else {
@@ -107,56 +116,55 @@ object GraphAlgorithms {
     }
   }
 
-  /**
-   * Computes the eccentricity of a vertex.
-   * That is, the maximum shortest-path distance from the vertex to any other vertex.
-   * Returns None if some vertices are unreachable.
-   */
+  /** Computes the eccentricity of a vertex. That is, the maximum shortest-path
+    * distance from the vertex to any other vertex. Returns None if some
+    * vertices are unreachable.
+    */
   def eccentricity(graph: Graph, source: Vertex): Option[Int] = {
     val (distances, _) = dijkstra(graph, source)
     if (distances.values.exists(_ == Int.MaxValue)) None
     else Some(distances.values.max)
   }
 
-  /**
-   * Computes the radius of the graph.
-   * The radius is the minimum eccentricity among all vertices.
-   */
+  /** Computes the radius of the graph. The radius is the minimum eccentricity
+    * among all vertices.
+    */
   def radius(graph: Graph): Option[Int] = {
-    val eccs = for (v <- graph.keys.toList; ecc <- eccentricity(graph, v)) yield ecc
+    val eccs =
+      for (v <- graph.keys.toList; ecc <- eccentricity(graph, v)) yield ecc
     if (eccs.isEmpty) None else Some(eccs.min)
   }
 
-  /**
-   * Computes the diameter of the graph.
-   * The diameter is the maximum eccentricity among all vertices.
-   */
+  /** Computes the diameter of the graph. The diameter is the maximum
+    * eccentricity among all vertices.
+    */
   def diameter(graph: Graph): Option[Int] = {
-    val eccs = for (v <- graph.keys.toList; ecc <- eccentricity(graph, v)) yield ecc
+    val eccs =
+      for (v <- graph.keys.toList; ecc <- eccentricity(graph, v)) yield ecc
     if (eccs.isEmpty) None else Some(eccs.max)
   }
 
-  /**
-   * Prints the graph in a human-friendly format.
-   */
+  /** Prints the graph in a human-friendly format.
+    */
   private def printGraph(graph: Graph): Unit = {
     println("{")
     for ((src, edges) <- graph) {
-      val edgeStr = edges.map { case (dst, weight) => s"($dst, $weight)" }.mkString("[", ", ", "]")
+      val edgeStr = edges
+        .map { case (dst, weight) => s"($dst, $weight)" }
+        .mkString("[", ", ", "]")
       println(s"  $src -> $edgeStr")
     }
     println("}")
   }
 
-  /**
-   * A simple command-line interface.
-   *
-   * Example usage:
-   *   scala GraphAlgorithms -N 4 -S 4
-   *
-   * It prints the randomly generated graph, the radius, the diameter,
-   * a shortest path between two randomly chosen vertices, and the eccentricity of one vertex.
-   */
+  /** A simple command-line interface.
+    *
+    * Example usage: scala GraphAlgorithms -N 4 -S 4
+    *
+    * It prints the randomly generated graph, the radius, the diameter, a
+    * shortest path between two randomly chosen vertices, and the eccentricity
+    * of one vertex.
+    */
   def run(number_of_vertices: Int = 10, sparseness: Int = 15): Unit = {
     val n = number_of_vertices
     val s = sparseness
@@ -180,7 +188,9 @@ object GraphAlgorithms {
       println(s"\nComputing shortest path from $src to $dst:")
       shortestPath(graph, src, dst) match {
         case Some((path, totalWeight)) =>
-          println(s"Path: ${path.mkString(" -> ")} (Total weight: $totalWeight)")
+          println(
+            s"Path: ${path.mkString(" -> ")} (Total weight: $totalWeight)"
+          )
         case None =>
           println("No path found.")
       }

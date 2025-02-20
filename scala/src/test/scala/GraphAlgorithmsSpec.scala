@@ -23,6 +23,15 @@ class GraphAlgorithmsSpec extends AnyFlatSpec with Matchers {
     }
   }
 
+  it should "throw an exception for non-positive number of vertices" in {
+    an [IllegalArgumentException] should be thrownBy {
+      makeGraph(0, 5)
+    }
+    an [IllegalArgumentException] should be thrownBy {
+      makeGraph(-1, 5)
+    }
+  }
+
   "shortestPath" should "find a valid shortest path in a known graph" in {
     // Construct a test graph:
     // A -> B (1), A -> C (4)
@@ -41,6 +50,19 @@ class GraphAlgorithmsSpec extends AnyFlatSpec with Matchers {
     totalWeight shouldEqual 4
   }
 
+  it should "return None when no path exists" in {
+    // Construct a disconnected graph:
+    // A -> B (1)
+    // C -> D (2)
+    val disconnectedGraph = Map(
+      "A" -> List(("B", 1)),
+      "B" -> Nil,
+      "C" -> List(("D", 2)),
+      "D" -> Nil
+    )
+    shortestPath(disconnectedGraph, "A", "D") shouldEqual None
+  }
+
   "eccentricity" should "compute the maximum distance from a vertex in a simple graph" in {
     // A linear graph: A -> B (1), B -> C (2), C -> D (3)
     val testGraph = Map(
@@ -51,6 +73,16 @@ class GraphAlgorithmsSpec extends AnyFlatSpec with Matchers {
     )
     // From A, the path is A->B->C->D: total weight 1+2+3 = 6
     eccentricity(testGraph, "A") shouldEqual Some(6)
+  }
+
+  it should "return None for eccentricity in a disconnected graph" in {
+    // Disconnected graph: A -> B (1), C isolated
+    val testGraph = Map(
+      "A" -> List(("B", 1)),
+      "B" -> Nil,
+      "C" -> Nil
+    )
+    eccentricity(testGraph, "A") shouldEqual None
   }
 
   "radius and diameter" should "be computed correctly for a symmetric graph" in {
@@ -69,5 +101,27 @@ class GraphAlgorithmsSpec extends AnyFlatSpec with Matchers {
     // Compute radius and diameter over all vertices
     radius(symmetricGraph) shouldEqual Some(3)   // minimal eccentricity (likely for C)
     diameter(symmetricGraph) shouldEqual Some(4) // maximum eccentricity (for A or D)
+  }
+
+  "shortestPath" should "compute shortest path correctly for a cycle graph" in {
+    val cycleGraph = Map(
+      "A" -> List(("B", 1)),
+      "B" -> List(("C", 1)),
+      "C" -> List(("A", 1))
+    )
+    val result = shortestPath(cycleGraph, "A", "C")
+    result shouldEqual Some((List("A", "B", "C"), 2))
+  }
+
+  it should "select the optimal path when multiple paths exist" in {
+    // Graph: A -> B (2), A -> C (1), B -> D (1), C -> D (3)
+    val testGraph = Map(
+      "A" -> List(("B", 2), ("C", 1)),
+      "B" -> List(("D", 1)),
+      "C" -> List(("D", 3)),
+      "D" -> Nil
+    )
+    val result = shortestPath(testGraph, "A", "D")
+    result shouldEqual Some((List("A", "B", "D"), 3))
   }
 }

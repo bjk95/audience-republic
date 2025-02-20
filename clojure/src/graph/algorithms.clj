@@ -1,4 +1,4 @@
-(ns graph
+(ns graph.algorithms
     (:require [clojure.data.priority-map :as pm]
               [clojure.string :as str]))
 
@@ -35,6 +35,7 @@
         graph))))
 
 (defn dijkstra
+;  Good opportunity to talk about structural sharing
   "Computes Dijkstra's algorithm on graph starting at source.
   Returns a vector of two maps: distances and previous."
   [graph source]
