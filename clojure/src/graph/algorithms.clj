@@ -35,7 +35,6 @@
         graph))))
 
 (defn dijkstra
-;  Good opportunity to talk about structural sharing
   "Computes Dijkstra's algorithm on graph starting at source.
   Returns a vector of two maps: distances and previous."
   [graph source]
@@ -151,8 +150,3 @@
        (let [random-vertex (nth (vec (keys graph)) (rand-int (count (keys graph))))]
          (println (str "\nEccentricity for vertex " random-vertex ":"))
          (println (or (eccentricity graph random-vertex) "undefined")))))))
-
-;; To run in the REPL, simply evaluate the namespace definitions and call:
-;; (load-file "graph.clj")
-;; (in-ns "graph")
-;; (run)

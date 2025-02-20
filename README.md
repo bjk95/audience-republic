@@ -1,4 +1,4 @@
-# GraphAlgorithms
+# Audience Republic Code Challenge
 
 ## TL;DR
 
