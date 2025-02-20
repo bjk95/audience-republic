@@ -135,3 +135,23 @@ These functions run Dijkstra’s algorithm for each vertex, which is not optimal
   - Limited, controlled mutability is employed in performance-critical sections to balance efficiency with functional purity.
 - **Modularity & Readability:**
   - Functions are designed to do one thing only, making the code easier to reason about, test, and extend.
+
+## Potential Improvements & Considerations
+
+While the current implementation is robust and well-structured, several potential enhancements could further improve clarity, performance, and maintainability:
+
+- **Refactoring Dijkstra's Algorithm:**
+  - Current State: The algorithm uses local mutable state (via atoms) to manage distances and the priority queue.
+  - Potential Improvement: Refactoring the loop into a recursive function that threads state through parameters could encapsulate mutability even more effectively and improve overall clarity, while still maintaining performance.
+- **Optimizing Graph Distance Calculations:**
+  - Current State: The functions for eccentricity, radius, and diameter each invoke Dijkstra’s algorithm separately.
+  - Potential Improvement: Investigating caching strategies or utilizing an all-pairs shortest path algorithm (such as Floyd–Warshall) might yield more efficient computations, particularly for larger graphs.
+- **Streamlining Random Vertex Selection in the CLI:**
+  - Current State: A recursive loop is used to ensure the destination vertex differs from the source.
+  - Potential Improvement: Simplifying the process by filtering the source out of the vertex list and then randomly selecting from the remaining vertices could make the code more concise and readable.
+- **Enhancing Error Handling and Input Validation:**
+  - Current State: Basic validations are in place for the vertex count and sparseness.
+  - Potential Improvement: Adding additional checks—such as ensuring the sparseness does not exceed the maximum possible for a simple directed graph (i.e., N(N-1))—and providing more detailed messaging around unreachable vertices could further strengthen robustness.
+- **Expanding Testing & Documentation:**
+  - Current State: A test suite is available and can be executed with lein test.
+  - Potential Improvement: Expanding the test coverage to include more edge cases (e.g., degenerate graphs) and offering deeper documentation on algorithmic tradeoffs and complexity considerations could be very beneficial for future maintainability.
